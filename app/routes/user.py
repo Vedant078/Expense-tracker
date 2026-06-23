@@ -28,10 +28,10 @@ def update_user(user_id : int,updated_user : userUpdate, session:Session=Depends
     if not user:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
-            destail = "User not found"
+            detail = "User not found"
         )
     else:
-        updated = updated_user.model_dump(set_exclude = True)
+        updated = updated_user.model_dump(exclude_unset = True)
 
         for key,value in updated.items():
             setattr(user,key,value)

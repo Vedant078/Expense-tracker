@@ -13,7 +13,7 @@ async def lifespan(app:FastAPI):
 
 app = FastAPI(
     title = "Secure expense tracker engine",
-    descriptions = "Engine for mantaining secured transaction logs",
+    description = "Engine for mantaining secured transaction logs",
     lifespan = lifespan
 
 )
