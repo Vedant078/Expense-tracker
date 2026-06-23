@@ -1,0 +1,45 @@
+from sqlmodel import SQLModel,Field, Relationship
+from typing import Optional , List
+from pydantic import BaseModel,EmailStr
+from datetime import datetime , timezone
+
+
+class User(SQLModel, table = True):
+    id : Optional[int] = Field(default = None, primary_key = True)
+    username : str = Field(unique = True)
+    email : EmailStr =  Field(unique = True)
+    password : str
+
+    transactions : List["Transaction"] = Relationship(back_populates = "owner")
+
+class Transaction(SQLModel, table = True):
+    id : Optional[int] = Field(default = None, primary_key = True)
+    title : str
+    amount : float
+    category : str
+    date : datetime = Field(default_factory = lambda : datetime.now(timezone.utc))
+    user_id : int = Field(foreign_key = "user.id", ondelete = "CASCADE")
+
+    owner : List[User] = Relationship(back_populates = "transactions")
+
+
+class UserCreate(BaseModel):
+    username : str
+    email  : EmailStr
+    password : str
+
+class TransactionCreate(BaseModel):
+    title : str
+    amount : float
+    category : str
+
+
+#Response models:
+class userResponse(BaseModel):
+    id : int
+    username : str
+    email : EmailStr
+
+class userUpdate(BaseModel):
+    username : Optional[str] = None
+    email : Optional[EmailStr] = None
