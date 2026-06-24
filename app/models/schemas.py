@@ -32,14 +32,30 @@ class TransactionCreate(BaseModel):
     title : str
     amount : float
     category : str
-
+    date : Optional[datetime] = None
+    user_id : int
 
 #Response models:
-class userResponse(BaseModel):
+class UserResponse(BaseModel):
     id : int
     username : str
     email : EmailStr
 
-class userUpdate(BaseModel):
+class UserUpdate(BaseModel):
     username : Optional[str] = None
     email : Optional[EmailStr] = None
+
+
+class TransactionUpdate(BaseModel):
+    title : Optional[str] = None
+    amount : Optional[float] = None
+    category : Optional[str] = None
+    date : Optional[datetime] = None
+
+class TransactionResponse(BaseModel):
+     id : int
+     title : str
+     amount : float
+     category : str
+     date : datetime
+     user_id : int

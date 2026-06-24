@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException,status
 from sqlmodel import select, Session
 from passlib.context import CryptContext
 from app.config.database import get_session
-from app.models.schemas import User,UserCreate,userResponse
+from app.models.schemas import User,UserCreate,UserResponse
 
 router = APIRouter(prefix = "/auth", tags = ["Authentication"])
 
@@ -12,7 +12,7 @@ def hashPassword(password : str)->str:
   return pwd_context.hash(password)
 
 
-@router.post("/register", status_code = status.HTTP_201_CREATED ,response_model = userResponse)
+@router.post("/register", status_code = status.HTTP_201_CREATED ,response_model = UserResponse)
 def register_user(userdata : UserCreate, session : Session = Depends(get_session)):
   
   Dup_User = session.exec(
