@@ -7,8 +7,8 @@ A secure FastAPI-based backend engine for maintaining and tracking secure expens
 ## Features
 
 - **Authentication System:** Secure registration and passlib/bcrypt password hashing.
-- **User Profiles:** Retrieve and update user profiles.
-- **Transaction Logs:** Data models for transactions linked to users with cascading deletes.
+- **User Profiles:** Retrieve, update, and delete user profiles (deleting a user cascades to delete all their transaction logs).
+- **Transaction Logs:** Complete CRUD operations (create, read, update, delete) for transaction logs linked to users with cascading deletes.
 - **Database Integration:** Integrated with PostgreSQL via SQLModel.
 
 ---
@@ -26,7 +26,8 @@ expense_tracker/
 │   │   └── __init__.py
 │   ├── routes/
 │   │   ├── auth.py           # Authentication routes (e.g., registration)
-│   │   ├── user.py           # User profile routes (get, update)
+│   │   ├── transactions.py   # Transaction routes (create, list, get, update, delete)
+│   │   ├── user.py           # User profile routes (get, update, delete)
 │   │   └── __init__.py
 │   ├── main.py               # Application startup and lifespan event handlers
 │   └── __init__.py
@@ -88,3 +89,11 @@ The engine will automatically create the required database tables on startup. Yo
 ### Users
 - `GET /users/{user_id}` - Get a user profile by ID.
 - `PATCH /users/{user_id}` - Update user profile information.
+- `DELETE /users/{user_id}` - Delete user profile (cascading delete on associated transactions).
+
+### Transactions
+- `POST /transactions/` - Create a transaction log (requires user validation).
+- `GET /transactions/` - List all transactions for a user (`?user_id=1`).
+- `GET /transactions/{transaction_id}` - Get detailed transaction information by ID.
+- `PATCH /transactions/{transaction_id}` - Update one or more transaction fields.
+- `DELETE /transactions/{transaction_id}` - Delete a specific transaction log entry.
