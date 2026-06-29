@@ -1,8 +1,8 @@
 from sqlmodel import SQLModel,create_engine, Session
+from app.config.configEnv import settings
 
-URL = "postgresql://localhost:5432/expense_db"
 
-engine = create_engine(URL, echo = True)
+engine = create_engine(settings.DATABASE_URL, echo = True)
 
 def create_db():
     SQLModel.metadata.create_all(engine)

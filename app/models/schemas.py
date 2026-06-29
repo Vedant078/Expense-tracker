@@ -18,9 +18,9 @@ class Transaction(SQLModel, table = True):
     amount : float
     category : str
     date : datetime = Field(default_factory = lambda : datetime.now(timezone.utc))
-    user_id : int = Field(foreign_key = "user.id", ondelete = "CASCADE")
+    user_id : int = Field(foreign_key = "user.id", sa_column_kwargs ={"ondelete" : "CASCADE"})
 
-    owner : List[User] = Relationship(back_populates = "transactions")
+    owner : Optional["User"] = Relationship(back_populates = "transactions")
 
 
 class UserCreate(BaseModel):
@@ -33,7 +33,7 @@ class TransactionCreate(BaseModel):
     amount : float
     category : str
     date : Optional[datetime] = None
-    user_id : int
+    
 
 #Response models:
 class UserResponse(BaseModel):

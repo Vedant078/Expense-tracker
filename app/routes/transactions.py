@@ -3,6 +3,7 @@ from datetime import datetime,timezone
 from sqlmodel import select,Session
 from app.config.database import get_session
 from app.models.schemas import User, Transaction,TransactionCreate,TransactionUpdate,TransactionResponse
+from app.utils.security import get_current_user_id
 from typing import List
 
 router = APIRouter(
@@ -11,15 +12,7 @@ router = APIRouter(
 )
 
 @router.post("/", status_code = status.HTTP_201_CREATED, response_model = TransactionResponse)
-def create_transaction(payload : TransactionCreate, session : Session = Depends(get_session)):
-
-    user = session.get(User,payload.user_id)
-
-    if not user:
-        raise HTTPException(
-            status_code = status.HTTP_404_NOT_FOUND,
-            detail = f"User with ID {payload.user_id} does not exist. Cannot attach transaction."
-        )
+def create_transaction(payload : TransactionCreate, session : Session = Depends(get_session) , current_user_id : int = Depends(get_current_user_id)):
     
     if payload.date:
         transaction_date = payload.date
@@ -31,8 +24,8 @@ def create_transaction(payload : TransactionCreate, session : Session = Depends(
         title = payload.title,
         amount = payload.amount,
         category = payload.category,
-        date = payload.date,
-        user_id = payload.user_id
+        date = transaction_date,
+        user_id = current_user_id
     ) 
     session.add(new_transaction)
     session.commit()
@@ -42,29 +35,32 @@ def create_transaction(payload : TransactionCreate, session : Session = Depends(
 
 
 @router.get("/",response_model = List[TransactionResponse])
-def get_all_transactions(user_id : int, session : Session = Depends(get_session)):
-    statement = select(Transaction).where(user_id == Transaction.user_id)
+def get_all_transactions( session : Session = Depends(get_session), current_user_id: int = Depends(get_current_user_id)):
+    statement = select(Transaction).where(current_user_id == Transaction.user_id)
     transaction_list = session.exec(statement).all()
 
     return transaction_list
 
 @router.get("/{transaction_id}", response_model = TransactionResponse)
-def get_transaction_by_id(tid : int, session : Session = Depends(get_session)):
-    transaction = session.get(Transaction, tid)
-
+def get_transaction_by_id(transaction_id : int, session : Session = Depends(get_session), current_user_id : int = Depends(get_current_user_id)):
+    transaction = session.exec(
+        select(Transaction).where((transaction_id == Transaction.id) & (Transaction.user_id == current_user_id))
+              ).first()
     if not transaction:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
-            detail = f"Transaction log entry {tid} not found."
+            detail = f"Transaction log entry {transaction_id} not found."
         )
 
     return transaction
 
 
 @router.patch("/{transaction_id}", response_model = TransactionResponse)
-def update_transactions(transaction_id : int , update_data : TransactionUpdate,session : Session = Depends(get_session)):
+def update_transactions(transaction_id : int , update_data : TransactionUpdate,session : Session = Depends(get_session),current_user_id: int = Depends(get_current_user_id)):
 
-    old_transaction = session.get(Transaction, transaction_id)
+    old_transaction = session.exec(
+        select(Transaction).where((Transaction.id == transaction_id) & ( Transaction.user_id == current_user_id))
+    ).first()
 
     if not old_transaction:
         raise HTTPException(
@@ -85,9 +81,11 @@ def update_transactions(transaction_id : int , update_data : TransactionUpdate,s
 
 
 @router.delete("/{transaction_id}", status_code = status.HTTP_200_OK)
-def delete_transaction(transaction_id : int , session : Session = Depends(get_session)):
+def delete_transaction(transaction_id : int , session : Session = Depends(get_session), current_user_id: int = Depends(get_current_user_id)):
 
-    transaction = session.get(Transaction, transaction_id)
+    transaction =  session.exec(
+        select(Transaction).where((Transaction.id == transaction_id) & ( Transaction.user_id == current_user_id))
+    ).first()
     if not transaction:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,

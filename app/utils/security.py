@@ -3,10 +3,9 @@ from passlib.context import CryptContext
 import jwt
 from fastapi import HTTPException,status,Depends
 from fastapi.security import OAuth2PasswordBearer
+from app.config.configEnv import settings
 
-SECRET_KEY = "SUPER_SECRET_COMPETITIVE_CODING_KEY_2026"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1440  
+
 
 pwd_context  = CryptContext(schemes= ["bcrypt"], deprecated = "auto")
 
@@ -23,24 +22,24 @@ def verify_password(plain_password : str, hashed_password : str) :
 def create_access_token(data : dict):
   
   to_encode = data.copy()
-  expire = datetime.now(timezone.utc) + timedelta(minutes = ACCESS_TOKEN_EXPIRE_MINUTES)
+  expire = datetime.now(timezone.utc) + timedelta(minutes = settings.ACCESS_TOKEN_EXPIRE_MINUTES)
   to_encode.update({"exp":expire})
-  return jwt.encode(to_encode,SECRET_KEY, algorithm = ALGORITHM)
+  return jwt.encode(to_encode,settings.SECRET_KEY, algorithm = settings.ALGORITHM)
 
 # Note :jwt.encode() uses only one algorithm to make a JWT while decoding requires multiple algos list thus jwt.decode() requires algorithms = [ALGORITHM]
 
 def get_current_user_id(token : str = Depends(oauth2_scheme)):
    try:
-    payload = jwt.decode(token, SECRET_KEY, algorithms = [ALGORITHM])
+    payload = jwt.decode(token, settings.SECRET_KEY, algorithms = [settings.ALGORITHM])
     user_id = payload.get("user_id")
  
-    if not user_id:
+    if user_id is None:
         raise HTTPException(
         status_code = status.HTTP_401_UNAUTHORIZED,
         detail = "could not verify credentials! Missing ID"
         )
   
-    return user_id
+    return int(user_id)
    
    except jwt.ExpiredSignatureError:
      raise HTTPException(
