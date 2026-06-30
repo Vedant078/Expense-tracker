@@ -2,7 +2,7 @@ from fastapi import APIRouter,Depends,HTTPException, status
 from sqlmodel import SQLModel, select, Session
 from app.config.database import get_session
 from app.models.schemas import User,UserResponse, UserUpdate
-from utils.security import get_current_user_id
+from app.utils.security import get_current_user_id
 
 router = APIRouter(prefix = "/users", tags = ["Users"])
 

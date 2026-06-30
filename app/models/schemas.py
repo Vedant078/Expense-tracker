@@ -2,7 +2,7 @@ from sqlmodel import SQLModel,Field, Relationship
 from typing import Optional , List
 from pydantic import BaseModel,EmailStr
 from datetime import datetime , timezone
-
+from sqlalchemy import ForeignKey
 
 class User(SQLModel, table = True):
     id : Optional[int] = Field(default = None, primary_key = True)
@@ -18,7 +18,8 @@ class Transaction(SQLModel, table = True):
     amount : float
     category : str
     date : datetime = Field(default_factory = lambda : datetime.now(timezone.utc))
-    user_id : int = Field(foreign_key = "user.id", sa_column_kwargs ={"ondelete" : "CASCADE"})
+    user_id : int = Field(default=None, 
+        sa_type=ForeignKey("user.id", ondelete="CASCADE"))
 
     owner : Optional["User"] = Relationship(back_populates = "transactions")
 
