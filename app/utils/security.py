@@ -7,16 +7,16 @@ from app.config.configEnv import settings
 
 
 
-pwd_context  = CryptContext(schemes= ["bcrypt"], deprecated = "auto")
+pwd_context  = CryptContext(schemes= ["bcrypt"], deprecated = "auto",bcrypt__backend="bcrypt")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 def hashPassword(password : str)->str:
-  return pwd_context.hash(password)
+  return pwd_context.hash(password.encode('utf-8'))
 
 
 def verify_password(plain_password : str, hashed_password : str) :
-  return pwd_context.verify(plain_password,hashed_password)
+  return pwd_context.verify(plain_password.encode('utf-8'),hashed_password)
 
 
 def create_access_token(data : dict):
