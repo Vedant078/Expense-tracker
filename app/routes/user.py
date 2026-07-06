@@ -1,7 +1,7 @@
 from fastapi import APIRouter,Depends,HTTPException, status
 from sqlmodel import SQLModel, select, Session
 from app.config.database import get_session
-from app.models.schemas import User,UserResponse, UserUpdate
+from app.models.schemas import User,UserResponse, UserUpdate,Transaction
 from app.utils.security import get_current_user_id
 
 router = APIRouter(prefix = "/users", tags = ["Users"])
@@ -56,15 +56,17 @@ def update_user(user_id : int,updated_user : UserUpdate, session:Session=Depends
     return user
 
  
+from sqlmodel import select
+
 @router.delete("/{user_id}", status_code = status.HTTP_200_OK)
 def delete_user(user_id : int, session : Session = Depends(get_session), current_user : int = Depends(get_current_user_id)):
-    if user_id!=current_user:
+    if user_id != current_user:
         raise HTTPException(
             status_code = status.HTTP_403_FORBIDDEN,
             detail = "You are not authorised to view this id"
         )
      
-    user = session.get(User,user_id)
+    user = session.get(User, user_id)
     
     if not user:
         raise HTTPException(
@@ -72,7 +74,15 @@ def delete_user(user_id : int, session : Session = Depends(get_session), current
             detail = "User not found"
         )
     
+    statement = select(Transaction).where(Transaction.user_id == user_id)
+    user_transactions = session.exec(statement).all()
+    
+    for transaction in user_transactions:
+        session.delete(transaction)
+    
     session.delete(user)
     session.commit()
     
-    return {"message" :f"User with Uid = {user_id} deleted!"}
+    return {"message" : f"User with Uid = {user_id} deleted!"}
+
+
