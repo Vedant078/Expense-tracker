@@ -75,7 +75,7 @@ def delete_user(user_id : int, session : Session = Depends(get_session), current
         )
     
     session.exec(delete(Transaction).where(Transaction.user_id == user_id))
-    
+    session.commit()
     session.delete(user)
     session.commit()
     
