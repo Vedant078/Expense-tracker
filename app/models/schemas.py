@@ -19,7 +19,7 @@ class User(SQLModel, table=True):
     # Direct tunnel configurations telling SQLAlchemy how to drop child rows securely
     transactions: List["Transaction"] = Relationship(
         back_populates="owner", 
-        sa_relationship_kwargs={"cascade": "all, delete-orphan", "passive_deletes": "all"}
+        sa_relationship_kwargs={"cascade": "all, delete-orphan", "passive_deletes": True}
     )
 
 
