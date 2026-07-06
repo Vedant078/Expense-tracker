@@ -10,7 +10,10 @@ class User(SQLModel, table = True):
     email : EmailStr =  Field(unique = True)
     password : str
 
-    transactions : List["Transaction"] = Relationship(back_populates = "owner")
+    transactions: List["Transaction"] = Relationship(
+    back_populates="owner", 
+    sa_relationship_kw={"cascade": "all, delete-orphan", "passive_deletes": True}
+)
 
 class Transaction(SQLModel, table = True):
     id : Optional[int] = Field(default = None, primary_key = True)
