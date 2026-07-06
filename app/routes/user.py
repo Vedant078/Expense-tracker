@@ -1,5 +1,5 @@
 from fastapi import APIRouter,Depends,HTTPException, status
-from sqlmodel import SQLModel, select, Session
+from sqlmodel import SQLModel, select, Session,delete
 from app.config.database import get_session
 from app.models.schemas import User,UserResponse, UserUpdate,Transaction
 from app.utils.security import get_current_user_id
@@ -74,11 +74,7 @@ def delete_user(user_id : int, session : Session = Depends(get_session), current
             detail = "User not found"
         )
     
-    statement = select(Transaction).where(Transaction.user_id == user_id)
-    user_transactions = session.exec(statement).all()
-    
-    for transaction in user_transactions:
-        session.delete(transaction)
+    session.exec(delete(Transaction).where(Transaction.user_id == user_id))
     
     session.delete(user)
     session.commit()
