@@ -19,6 +19,9 @@
   --success: #16a34a;
   --success-bg: #f0fdf4;
   --success-border: #bbf7d0;
+  --warning: #b45309;
+  --warning-bg: #fffbeb;
+  --warning-border: #fde68a;
   --radius: 8px;
   --transition: 0.15s ease;
   --shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.04), 0 4px 6px -2px rgba(15, 23, 42, 0.02), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
@@ -43,6 +46,9 @@
     --success: #4ade80;
     --success-bg: #064e3b30;
     --success-border: #065f46;
+    --warning: #fbbf24;
+    --warning-bg: #78350f30;
+    --warning-border: #78350f;
     --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
   }
 }
@@ -266,6 +272,29 @@ tr:hover td {
   background-color: var(--success-bg);
   border-color: var(--success-border);
   color: var(--success);
+}
+
+.alert-warning {
+  background-color: var(--warning-bg);
+  border-color: var(--warning-border);
+  color: var(--warning);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Auth Pages Container */

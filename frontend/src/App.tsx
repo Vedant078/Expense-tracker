@@ -94,6 +94,9 @@ export default function App() {
   const [editAmount, setEditAmount] = useState('');
   const [editCategory, setEditCategory] = useState('Food');
 
+  // Server wake up state
+  const [isServerWakingUp, setIsServerWakingUp] = useState(false);
+
   // Setup Axios Interceptors and parse token when token changes
   useEffect(() => {
     if (token) {
@@ -129,6 +132,26 @@ export default function App() {
       fetchTransactions();
     }
   }, [token, userId]);
+
+  // Ping the server on mount to detect wake-up state for free-tier hosting
+  useEffect(() => {
+    const checkServer = async () => {
+      const timer = setTimeout(() => {
+        setIsServerWakingUp(true);
+      }, 3000);
+
+      try {
+        await axios.get(API_URL);
+      } catch (err) {
+        console.log('Server ping completed (responsive)');
+      } finally {
+        clearTimeout(timer);
+        setIsServerWakingUp(false);
+      }
+    };
+
+    checkServer();
+  }, []);
 
   // Network Calls
   const fetchProfile = async () => {
@@ -360,7 +383,13 @@ export default function App() {
   // Unauthenticated View: Login/Register Forms
   if (!token) {
     return (
-      <div className="auth-container">
+      <div className="auth-container" style={{ flexDirection: 'column', gap: '16px' }}>
+        {isServerWakingUp && (
+          <div className="alert alert-warning" style={{ width: '100%', maxWidth: '400px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className="spinner"></div>
+            <span>Server is waking up after a period of inactivity. Please wait 50-60 seconds...</span>
+          </div>
+        )}
         <div className="auth-card">
           <div className="logo-container" style={{ justifyContent: 'center', marginBottom: '24px' }}>
             <Wallet size={24} />
@@ -512,6 +541,12 @@ export default function App() {
       </header>
 
       <main className="container">
+        {isServerWakingUp && (
+          <div className="alert alert-warning" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className="spinner"></div>
+            <span>Server is waking up after a period of inactivity. Please wait 50-60 seconds...</span>
+          </div>
+        )}
         {errorMsg && <div className="alert alert-error">{errorMsg}</div>}
         {successMsg && <div className="alert alert-success">{successMsg}</div>}
 
